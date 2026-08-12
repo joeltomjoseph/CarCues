@@ -20,12 +20,12 @@
         tools:text="@string/title" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/cueButton"
         android:layout_width="168dp"
         android:layout_height="78dp"
         android:layout_marginBottom="40dp"
-        android:onClick="enableCues"
-        android:text="@string/enableCarCue"
+        android:onClick="toggleCues"
+        android:text="@string/enable_cues"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

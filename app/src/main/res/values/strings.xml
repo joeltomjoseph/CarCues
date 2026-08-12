@@ -1,7 +1,17 @@
 <resources>
     <string name="app_name">Car Cues</string>
-    <string name="enableCarCue">Enable</string>
+    <string name="enable_cues">Enable</string>
+    <string name="disable_cues">Disable</string>
+    <string name="stop_cues">Stop cues</string>
     <string name="title">Car Cues</string>
     <string name="channel_name">Car Cues</string>
-    <string name="channel_description">PLACEHOLDER CHANNEL DESCRIPTION</string>
+    <string name="channel_description">Shows when motion cues are active</string>
+    <string name="notification_title">Car Cues active</string>
+    <string name="notification_text">Tap to open the app</string>
+    <string name="overlay_access_required">Allow Car Cues to display over other apps before enabling cues.</string>
+    <string name="overlay_access_removed">Overlay access was removed. Cues stopped.</string>
+    <string name="motion_sensor_unsupported">This phone does not provide the motion sensors Car Cues needs.</string>
+    <string name="motion_sensor_unavailable">The motion sensor could not be started.</string>
+    <string name="notifications_required">Enable Car Cues notifications so the Stop cues action remains available.</string>
+    <string name="cue_session_failed">Car Cues could not start the cue session.</string>
 </resources>
