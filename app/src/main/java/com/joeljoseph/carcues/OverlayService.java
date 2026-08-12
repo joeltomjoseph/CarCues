@@ -277,13 +277,13 @@ public class OverlayService extends Service implements SensorEventListener {
             return;
         }
 
-        MotionEstimator.NormalizedCueOffset offset = motionEstimator.sample(
+        MotionEstimator.NormalizedVehicleAccelerationEstimate estimate = motionEstimator.sample(
                 event.timestamp,
                 x,
                 y,
                 currentDisplayRotation()
         );
-        cueFieldView.setCueOffset(offset);
+        cueFieldView.setVehicleAccelerationEstimate(estimate);
     }
 
     private int currentDisplayRotation() {
@@ -301,6 +301,7 @@ public class OverlayService extends Service implements SensorEventListener {
         super.onConfigurationChanged(newConfig);
         motionEstimator.reset();
         if (cueFieldView != null && overlayParams != null) {
+            cueFieldView.resetCueFlow();
             windowManager.updateViewLayout(cueFieldView, overlayParams);
             cueFieldView.requestLayout();
         }

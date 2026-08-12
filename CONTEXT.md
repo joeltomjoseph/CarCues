@@ -5,16 +5,20 @@ CarCues provides visual references intended to reduce passenger motion sickness 
 ## Language
 
 **Motion cue**:
-A peripheral dot whose displacement visually represents estimated vehicle acceleration.
+A peripheral dot whose movement visually represents estimated vehicle acceleration.
 _Avoid_: Circle, grid dot
 
 **Cue field**:
-The complete set of motion cues displayed across both side cue rails.
+The staggered lattice of motion cues visible through both side cue rails.
 _Avoid_: Circle grid, overlay grid
 
 **Cue rail**:
-A vertical group of motion cues positioned along the left or right screen edge.
+A vertical edge zone through which a group of motion cues flows.
 _Avoid_: Edge dots, grid column
+
+**Cue flow**:
+The continuous, directionally coherent movement of motion cues through their rails. Cues fade at rail boundaries while the staggered pattern wraps seamlessly, so outgoing cues are replaced without a visible jump.
+_Avoid_: Static offset, grid translation
 
 **Cue session**:
 The period during which the cue field is enabled system-wide, from explicit activation until explicit deactivation.

@@ -15,7 +15,7 @@ final class MotionEstimator {
     private float filteredRight;
     private float filteredDown;
 
-    NormalizedCueOffset sample(
+    NormalizedVehicleAccelerationEstimate sample(
             long timestampNanos,
             float deviceX,
             float deviceY,
@@ -46,7 +46,7 @@ final class MotionEstimator {
 
         if (lastTimestampNanos == 0L || displayRotation != lastDisplayRotation) {
             resetAt(timestampNanos, displayRotation);
-            return NormalizedCueOffset.NEUTRAL;
+            return NormalizedVehicleAccelerationEstimate.NEUTRAL;
         }
 
         float elapsedSeconds = (timestampNanos - lastTimestampNanos) / 1_000_000_000f;
@@ -54,14 +54,17 @@ final class MotionEstimator {
         if (elapsedSeconds <= 0f || elapsedSeconds > MAX_SAMPLE_GAP_SECONDS) {
             filteredRight = 0f;
             filteredDown = 0f;
-            return NormalizedCueOffset.NEUTRAL;
+            return NormalizedVehicleAccelerationEstimate.NEUTRAL;
         }
 
         float alpha = 1f - (float) Math.exp(-elapsedSeconds / FILTER_TIME_CONSTANT_SECONDS);
         filteredRight += alpha * (screenRight - filteredRight);
         filteredDown += alpha * (screenDown - filteredDown);
 
-        return new NormalizedCueOffset(normalize(filteredRight), normalize(filteredDown));
+        return new NormalizedVehicleAccelerationEstimate(
+                normalize(filteredRight),
+                normalize(filteredDown)
+        );
     }
 
     void reset() {
@@ -90,13 +93,14 @@ final class MotionEstimator {
         return Math.copySign(Math.min(normalized, 1f), acceleration);
     }
 
-    static final class NormalizedCueOffset {
-        static final NormalizedCueOffset NEUTRAL = new NormalizedCueOffset(0f, 0f);
+    static final class NormalizedVehicleAccelerationEstimate {
+        static final NormalizedVehicleAccelerationEstimate NEUTRAL =
+                new NormalizedVehicleAccelerationEstimate(0f, 0f);
 
         final float normalizedRight;
         final float normalizedDown;
 
-        NormalizedCueOffset(float normalizedRight, float normalizedDown) {
+        NormalizedVehicleAccelerationEstimate(float normalizedRight, float normalizedDown) {
             this.normalizedRight = normalizedRight;
             this.normalizedDown = normalizedDown;
         }
