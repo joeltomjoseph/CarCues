@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
@@ -33,7 +34,14 @@ import androidx.core.app.NotificationManagerCompat;
 public class OverlayService extends Service implements SensorEventListener {
     static final String ACTION_START = "com.joeljoseph.carcues.START";
     static final String ACTION_STOP = "com.joeljoseph.carcues.STOP";
+    static final String ACTION_UPDATE_SENSITIVITY =
+            "com.joeljoseph.carcues.UPDATE_SENSITIVITY";
     static final String CHANNEL_ID = "cue_session";
+    static final String PREFERENCES_NAME = "cue_preferences";
+    static final String HORIZONTAL_SENSITIVITY_KEY = "horizontal_sensitivity";
+    static final String VERTICAL_SENSITIVITY_KEY = "vertical_sensitivity";
+    static final float DEFAULT_HORIZONTAL_SENSITIVITY = 1f;
+    static final float DEFAULT_VERTICAL_SENSITIVITY = 2f;
 
     private static final int NOTIFICATION_ID = 1;
     private static final int SENSOR_PERIOD_MICROSECONDS = 20_000;
@@ -92,6 +100,13 @@ public class OverlayService extends Service implements SensorEventListener {
             return START_NOT_STICKY;
         }
 
+        if (ACTION_UPDATE_SENSITIVITY.equals(action)) {
+            if (active) {
+                loadSensitivity();
+            }
+            return active ? START_STICKY : START_NOT_STICKY;
+        }
+
         if (!ACTION_START.equals(action)) {
             stopSelf(startId);
             return START_NOT_STICKY;
@@ -114,6 +129,7 @@ public class OverlayService extends Service implements SensorEventListener {
                 throw new IllegalStateException(getString(R.string.motion_sensor_unsupported));
             }
 
+            loadSensitivity();
             addCueField();
             if (!registerMotionSensors()) {
                 throw new IllegalStateException(getString(R.string.motion_sensor_unavailable));
@@ -129,6 +145,20 @@ public class OverlayService extends Service implements SensorEventListener {
             stopCueSession();
             return false;
         }
+    }
+
+    private void loadSensitivity() {
+        SharedPreferences preferences = getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE);
+        motionEstimator.setSensitivity(
+                preferences.getFloat(
+                        HORIZONTAL_SENSITIVITY_KEY,
+                        DEFAULT_HORIZONTAL_SENSITIVITY
+                ),
+                preferences.getFloat(
+                        VERTICAL_SENSITIVITY_KEY,
+                        DEFAULT_VERTICAL_SENSITIVITY
+                )
+        );
     }
 
     private void startInForeground() {

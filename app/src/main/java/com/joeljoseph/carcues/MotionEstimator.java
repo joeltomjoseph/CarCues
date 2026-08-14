@@ -14,6 +14,13 @@ final class MotionEstimator {
     private int lastDisplayRotation = -1;
     private float filteredRight;
     private float filteredDown;
+    private float rightSensitivity = 1f;
+    private float downSensitivity = 1f;
+
+    void setSensitivity(float rightSensitivity, float downSensitivity) {
+        this.rightSensitivity = clamp(rightSensitivity, 0.5f, 3f);
+        this.downSensitivity = clamp(downSensitivity, 0.5f, 3f);
+    }
 
     NormalizedVehicleAccelerationEstimate sample(
             long timestampNanos,
@@ -62,8 +69,8 @@ final class MotionEstimator {
         filteredDown += alpha * (screenDown - filteredDown);
 
         return new NormalizedVehicleAccelerationEstimate(
-                normalize(filteredRight),
-                normalize(filteredDown)
+                clamp(normalize(filteredRight) * rightSensitivity, -1f, 1f),
+                clamp(normalize(filteredDown) * downSensitivity, -1f, 1f)
         );
     }
 
@@ -91,6 +98,10 @@ final class MotionEstimator {
                 / (FULL_SCALE_METERS_PER_SECOND_SQUARED
                 - DEAD_BAND_METERS_PER_SECOND_SQUARED);
         return Math.copySign(Math.min(normalized, 1f), acceleration);
+    }
+
+    private static float clamp(float value, float minimum, float maximum) {
+        return Math.max(minimum, Math.min(value, maximum));
     }
 
     static final class NormalizedVehicleAccelerationEstimate {

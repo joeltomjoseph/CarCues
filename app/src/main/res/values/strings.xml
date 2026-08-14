@@ -14,4 +14,6 @@
     <string name="motion_sensor_unavailable">The motion sensor could not be started.</string>
     <string name="notifications_required">Enable Car Cues notifications so the Stop cues action remains available.</string>
     <string name="cue_session_failed">Car Cues could not start the cue session.</string>
+    <string name="left_right_sensitivity">Left/right sensitivity</string>
+    <string name="forward_back_sensitivity">Forward/back sensitivity</string>
 </resources>

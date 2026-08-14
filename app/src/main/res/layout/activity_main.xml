@@ -31,4 +31,49 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/cueButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/left_right_sensitivity"
+            android:textSize="18sp" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/horizontalSensitivity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/left_right_sensitivity"
+            android:value="1"
+            android:stepSize="0.5"
+            android:valueFrom="0.5"
+            android:valueTo="3" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/forward_back_sensitivity"
+            android:textSize="18sp" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/verticalSensitivity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/forward_back_sensitivity"
+            android:value="2"
+            android:stepSize="0.5"
+            android:valueFrom="0.5"
+            android:valueTo="3" />
+
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
