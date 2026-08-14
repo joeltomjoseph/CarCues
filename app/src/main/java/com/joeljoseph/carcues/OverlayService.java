@@ -101,10 +101,12 @@ public class OverlayService extends Service implements SensorEventListener {
         }
 
         if (ACTION_UPDATE_SENSITIVITY.equals(action)) {
-            if (active) {
-                loadSensitivity();
+            if (!active) {
+                stopSelf(startId);
+                return START_NOT_STICKY;
             }
-            return active ? START_STICKY : START_NOT_STICKY;
+            loadSensitivity();
+            return START_STICKY;
         }
 
         if (!ACTION_START.equals(action)) {
