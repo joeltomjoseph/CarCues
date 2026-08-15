@@ -6,8 +6,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
@@ -59,6 +61,27 @@ public class OverlayService extends Service implements SensorEventListener {
     private boolean hasGravitySample;
     private boolean foregroundStarted;
     private boolean watchingOverlayAccess;
+    private boolean watchingScreenState;
+
+    private final BroadcastReceiver screenStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                sensorManager.unregisterListener(OverlayService.this);
+                resetMotionState();
+            } else if (Intent.ACTION_SCREEN_ON.equals(intent.getAction()) && active) {
+                resetMotionState();
+                if (!registerMotionSensors()) {
+                    Toast.makeText(
+                            OverlayService.this,
+                            R.string.motion_sensor_unavailable,
+                            Toast.LENGTH_LONG
+                    ).show();
+                    stopCueSession();
+                }
+            }
+        }
+    };
 
     private final AppOpsManager.OnOpChangedListener overlayAccessListener =
             (operation, packageName) -> mainHandler.post(() -> {
@@ -136,6 +159,10 @@ public class OverlayService extends Service implements SensorEventListener {
             if (!registerMotionSensors()) {
                 throw new IllegalStateException(getString(R.string.motion_sensor_unavailable));
             }
+            IntentFilter screenStateFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+            screenStateFilter.addAction(Intent.ACTION_SCREEN_OFF);
+            registerReceiver(screenStateReceiver, screenStateFilter);
+            watchingScreenState = true;
             watchOverlayAccess();
             active = true;
             return true;
@@ -331,11 +358,18 @@ public class OverlayService extends Service implements SensorEventListener {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        motionEstimator.reset();
+        resetMotionState();
         if (cueFieldView != null && overlayParams != null) {
-            cueFieldView.resetCueFlow();
             windowManager.updateViewLayout(cueFieldView, overlayParams);
             cueFieldView.requestLayout();
+        }
+    }
+
+    private void resetMotionState() {
+        hasGravitySample = false;
+        motionEstimator.reset();
+        if (cueFieldView != null) {
+            cueFieldView.resetCueFlow();
         }
     }
 
@@ -351,10 +385,13 @@ public class OverlayService extends Service implements SensorEventListener {
 
     private void cleanUpSession() {
         active = false;
-        hasGravitySample = false;
-        motionEstimator.reset();
+        resetMotionState();
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
+        }
+        if (watchingScreenState) {
+            unregisterReceiver(screenStateReceiver);
+            watchingScreenState = false;
         }
         if (watchingOverlayAccess && appOpsManager != null) {
             appOpsManager.stopWatchingMode(overlayAccessListener);
