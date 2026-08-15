@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -23,12 +24,15 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.slider.Slider;
+
 public class MainActivity extends AppCompatActivity {
     private static final String STATE_WAITING_FOR_OVERLAY_ACCESS =
             "waiting_for_overlay_access";
     private static final int NOTIFICATION_REQUEST_CODE = 101;
 
     private Button cueButton;
+    private SharedPreferences cuePreferences;
     private boolean waitingForOverlayAccess;
 
     @Override
@@ -38,12 +42,40 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         cueButton = findViewById(R.id.cueButton);
+        cuePreferences = getSharedPreferences(OverlayService.PREFERENCES_NAME, MODE_PRIVATE);
+        setUpSensitivitySlider(
+                R.id.horizontalSensitivity,
+                OverlayService.HORIZONTAL_SENSITIVITY_KEY,
+                OverlayService.DEFAULT_HORIZONTAL_SENSITIVITY
+        );
+        setUpSensitivitySlider(
+                R.id.verticalSensitivity,
+                OverlayService.VERTICAL_SENSITIVITY_KEY,
+                OverlayService.DEFAULT_VERTICAL_SENSITIVITY
+        );
         waitingForOverlayAccess = savedInstanceState != null
                 && savedInstanceState.getBoolean(STATE_WAITING_FOR_OVERLAY_ACCESS);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (view, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+    }
+
+    private void setUpSensitivitySlider(int sliderId, String preferenceKey, float defaultValue) {
+        Slider slider = findViewById(sliderId);
+        slider.setValue(cuePreferences.getFloat(preferenceKey, defaultValue));
+        slider.addOnChangeListener((ignored, value, fromUser) -> {
+            if (!fromUser) {
+                return;
+            }
+            cuePreferences.edit().putFloat(preferenceKey, value).apply();
+            if (OverlayService.isActive()) {
+                startService(
+                        new Intent(this, OverlayService.class)
+                                .setAction(OverlayService.ACTION_UPDATE_SENSITIVITY)
+                );
+            }
         });
     }
 
